@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sohala for CRE — Leave-behind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Newsreader:ital,wght@1,400;1,500&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f9fafb;
+    --warm: #faf7f1;
+    --cream: #f5f1ea;
+    --ink: #001419;
+    --ink-2: #0a2630;
+    --slate: #3c4650;
+    --muted: #7a7a7a;
+    --hair: rgba(0,20,25,0.08);
+    --hair-soft: rgba(0,20,25,0.05);
+    --accent: #04a3cb;
+    --accent-bright: #04afda;
+    --accent-soft: #b4effe;
+    --display: 'Inter Tight', system-ui, sans-serif;
+    --serif: 'Newsreader', Georgia, serif;
+    --body: 'Roboto', system-ui, sans-serif;
+    /* agent palette — same as repo /CLAUDE.md */
+    --nova:    #E8441A;
+    --cipher:  #00A8E5;
+    --lyra:    #B44FFF;
+    --vex:     #00B888;
+    --sage:    #E6A300;
+    --deal:    #E63064;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--body); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  /* SCREEN: scroll-snap deck */
+  .deck {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+  .slide {
+    position: relative;
+    width: min(1280px, 96vw);
+    aspect-ratio: 16 / 9;
+    margin: 24px auto;
+    background: linear-gradient(178deg, var(--warm) 0%, #fdfcfa 55%, #ffffff 100%);
+    border: 1px solid var(--hair-soft);
+    border-radius: 32px;
+    box-shadow: 0 30px 80px -20px rgba(0,20,25,0.07), 0 1px 2px rgba(0,20,25,0.04);
+    overflow: hidden;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    padding: 64px 80px;
+  }
+  .slide__glow {
+    position: absolute;
+    top: -160px; right: -160px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(4,163,203,0.06) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide__glow--warm {
+    position: absolute;
+    bottom: -200px; left: -80px;
+    width: 460px; height: 460px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--cream) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide__art {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .slide__art svg { position: absolute; bottom: 0; right: 0; width: 720px; height: 500px; }
+
+  .slide__content { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; }
+  .slide__footer {
+    position: absolute;
+    bottom: 28px;
+    left: 80px;
+    right: 80px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--body);
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .slide__num {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+
+  /* Tokens */
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+  .wordmark .teal { color: var(--accent); }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 14px 7px 11px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.65);
+    border: 1px solid var(--hair);
+    backdrop-filter: blur(8px);
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--slate);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .eyebrow__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(4,163,203,0.14); }
+
+  h1, h2 { margin: 0; color: var(--ink); }
+  .display {
+    font-family: var(--display);
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: -0.028em;
+  }
+  .display em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: -0.015em;
+  }
+  .h-xl { font-size: 76px; }
+  .h-lg { font-size: 60px; }
+  .h-md { font-size: 44px; }
+
+  .sub {
+    font-family: var(--body);
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--slate);
+    max-width: 720px;
+  }
+  .sub--narrow { max-width: 520px; }
+  .lede {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--slate);
+    letter-spacing: -0.012em;
+    max-width: 800px;
+  }
+  .micro {
+    font-family: var(--body);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Cards / grids */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .grid-agents { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+  .card {
+    background: white;
+    border: 1px solid var(--hair);
+    border-radius: 24px;
+    padding: 26px 26px 24px;
+  }
+  .card__head {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .card__title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 0 0 8px;
+  }
+  .card__body {
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--slate);
+    margin: 0;
+  }
+
+  /* Compare slide */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 36px;
+  }
+  .compare__col { padding: 28px 30px; border-radius: 24px; }
+  .compare__col--bad {
+    background: var(--warm);
+    border: 1px dashed var(--hair);
+  }
+  .compare__col--good {
+    background: white;
+    border: 1px solid rgba(4,163,203,0.3);
+    box-shadow: 0 18px 40px -16px rgba(4,163,203,0.18);
+  }
+  .compare__lab {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .compare__col--good .compare__lab { color: var(--accent); }
+  .compare__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .compare__list li {
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--slate);
+    padding-left: 18px;
+    position: relative;
+  }
+  .compare__list li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--hair);
+  }
+  .compare__col--good .compare__list li { color: var(--ink); }
+  .compare__col--good .compare__list li::before { color: var(--accent); content: "·"; font-size: 22px; line-height: 0.6; top: 4px; }
+
+  /* Agent cards */
+  .agent {
+    background: white;
+    border: 1px solid var(--hair);
+    border-radius: 22px;
+    padding: 22px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 168px;
+  }
+  .agent__dot {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.04em;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.4) inset;
+  }
+  .agent__name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+  }
+  .agent__role {
+    font-family: var(--body);
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--slate);
+    margin: 0;
+  }
+
+  /* Mini welcome render */
+  .mockup {
+    position: relative;
+    background: linear-gradient(178deg, var(--warm) 0%, #fdfcfa 60%, #ffffff 100%);
+    border: 1px solid var(--hair);
+    border-radius: 22px;
+    padding: 22px 28px;
+    box-shadow: 0 18px 40px -16px rgba(0,20,25,0.1);
+    overflow: hidden;
+  }
+  .mockup__tab {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--hair-soft);
+    margin-bottom: 18px;
+  }
+  .mockup__url {
+    flex: 1;
+    background: white;
+    border: 1px solid var(--hair-soft);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  .mockup__url::before { content: "● "; color: var(--accent); }
+  .mockup__head {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .mockup__head em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .mockup__sub {
+    font-size: 12px;
+    color: var(--slate);
+    line-height: 1.5;
+    margin-bottom: 14px;
+    max-width: 320px;
+  }
+  .mockup__cta {
+    display: inline-block;
+    padding: 7px 14px;
+    background: var(--ink);
+    color: white;
+    border-radius: 999px;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: -0.005em;
+  }
+  .mockup__marquee {
+    margin-top: 18px;
+    display: flex;
+    gap: 8px;
+    overflow: hidden;
+  }
+  .mockup__brand {
+    flex-shrink: 0;
+    background: white;
+    border: 1px solid var(--hair);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  /* Artifact mock */
+  .file {
+    background: white;
+    border: 1px solid var(--hair);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  .file__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: var(--warm);
+    border-bottom: 1px solid var(--hair-soft);
+  }
+  .file__name {
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--slate);
+  }
+  .file__lab {
+    font-family: var(--body);
+    font-size: 10.5px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .file__body {
+    padding: 16px 18px;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--slate);
+    min-height: 160px;
+    white-space: pre-wrap;
+  }
+  .file__body .k { color: var(--accent); }
+  .file__body .c { color: var(--muted); font-style: italic; }
+  .file__caption {
+    font-family: var(--body);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--slate);
+    margin: 14px 0 0;
+  }
+
+  /* Stat row */
+  .stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 36px;
+  }
+  .stat__val {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 36px;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat__val em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .stat__lab {
+    font-family: var(--body);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* Day-one timeline */
+  .day1 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 36px;
+  }
+  .day1__col {
+    background: white;
+    border: 1px solid var(--hair);
+    border-radius: 22px;
+    padding: 24px 24px 22px;
+  }
+  .day1__hour {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .day1__agent {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .day1__action {
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--slate);
+    margin: 0;
+  }
+  .day1__sample {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--muted);
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    background: var(--warm);
+    border-radius: 12px;
+    border-left: 2px solid var(--accent);
+  }
+
+  /* Prediction graph */
+  .pred {
+    margin-top: 32px;
+    background: white;
+    border: 1px solid var(--hair);
+    border-radius: 22px;
+    padding: 32px 32px 26px;
+  }
+  .pred__timeline {
+    position: relative;
+    height: 160px;
+  }
+  .pred__line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--hair);
+  }
+  .pred__tick {
+    position: absolute;
+    bottom: -4px;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    transform: translateX(-50%);
+  }
+  .pred__tick::before {
+    content: "";
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 8px;
+    background: var(--hair);
+  }
+  .pred__dot {
+    position: absolute;
+    bottom: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translate(-50%, 50%);
+    box-shadow: 0 0 0 3px rgba(4,163,203,0.14);
+  }
+  .pred__curve {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+  .pred__cap {
+    margin-top: 24px;
+    font-family: var(--body);
+    font-size: 13px;
+    color: var(--slate);
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* CTA / contact */
+  .cta-block {
+    margin-top: 36px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 26px;
+    background: var(--ink);
+    color: white;
+    border-radius: 999px;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+  }
+  .cta--accent { background: var(--accent); }
+  .cta svg { width: 16px; height: 16px; }
+  .contact {
+    font-family: var(--body);
+    font-size: 14px;
+    color: var(--slate);
+    line-height: 1.5;
+  }
+  .contact strong { font-weight: 500; color: var(--ink); }
+
+  /* Print to PDF */
+  .printhint {
+    position: fixed;
+    bottom: 18px;
+    right: 24px;
+    z-index: 100;
+    padding: 9px 14px;
+    background: var(--ink);
+    color: white;
+    border-radius: 999px;
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+    cursor: pointer;
+    border: 0;
+  }
+  .printhint:hover { opacity: 1; }
+
+  @media print {
+    body, .deck { background: white; height: auto; overflow: visible; }
+    .printhint { display: none; }
+    @page { size: 1280px 720px; margin: 0; }
+    .slide {
+      width: 1280px;
+      height: 720px;
+      aspect-ratio: auto;
+      margin: 0;
+      border-radius: 0;
+      border: 0;
+      box-shadow: none;
+      page-break-after: always;
+      page-break-inside: avoid;
+      break-after: page;
+    }
+    .slide:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+<button class="printhint" onclick="window.print()">⌘P · Save as PDF</button>
+
+<div class="deck">
+
+  <!-- ───────── SLIDE 1 · COVER ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+    <div class="slide__glow--warm"></div>
+    <div class="slide__art" aria-hidden="true">
+      <!-- Architectural skyline (same as app) -->
+      <svg viewBox="0 0 780 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#001419" stroke-width="0.6" stroke-opacity="0.42">
+          <line x1="0" y1="478" x2="780" y2="478" stroke-opacity="0.13"/>
+          <circle cx="430" cy="180" r="78" stroke-opacity="0.09"/>
+          <circle cx="430" cy="180" r="46" stroke-opacity="0.07"/>
+          <rect x="610" y="138" width="72" height="340"/>
+          <rect x="624" y="108" width="44" height="30" stroke-opacity="0.5"/>
+          <rect x="690" y="260" width="62" height="218"/>
+          <rect x="520" y="228" width="46" height="250"/>
+          <rect x="566" y="378" width="44" height="100"/>
+          <rect x="440" y="396" width="80" height="82"/>
+          <line x1="646" y1="108" x2="646" y2="78" stroke-opacity="0.4"/>
+          <g stroke-opacity="0.32">
+            <line x1="380" y1="478" x2="380" y2="200"/>
+            <line x1="380" y1="200" x2="486" y2="200"/>
+            <line x1="380" y1="200" x2="350" y2="218"/>
+            <line x1="350" y1="218" x2="380" y2="240"/>
+            <line x1="486" y1="200" x2="478" y2="220"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="slide__content">
+      <div class="wordmark"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</div>
+
+      <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+        <div class="eyebrow" style="align-self:flex-start; margin-bottom: 28px;">
+          <span class="eyebrow__dot"></span>
+          Leave-behind · For your review
+        </div>
+        <h1 class="display h-xl" style="max-width: 920px;">
+          Sohala for <em>commercial real estate</em>.
+        </h1>
+        <p class="lede" style="margin-top: 28px; max-width: 660px;">
+          Six AI agents, configured to your firm — not generic copilots.
+        </p>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span>Confidential · Prepared after our conversation</span>
+      <span class="slide__num">01 · COVER</span>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 2 · THE SHIFT ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+
+    <div class="slide__content">
+      <div class="eyebrow" style="align-self:flex-start;">
+        <span class="eyebrow__dot"></span>
+        The landscape · 2026
+      </div>
+
+      <h2 class="display h-md" style="margin-top: 24px; max-width: 900px;">
+        Every brokerage is being shown <em>the same AI demo</em>.
+      </h2>
+      <p class="sub" style="margin-top: 18px;">
+        A chatbot in a wrapper. A drafting tool that sounds like everyone else's drafting tool. A dashboard with no opinion. None of it knows your asset class, your submarket, or your voice. We don't build that.
+      </p>
+
+      <div class="compare">
+        <div class="compare__col compare__col--bad">
+          <div class="compare__lab">What you've been seeing</div>
+          <ul class="compare__list">
+            <li>Generic chatbots that wander when you ask them anything specific.</li>
+            <li>"AI for real estate" tools built on residential workflows.</li>
+            <li>Productivity copilots that don't know your pipeline stages.</li>
+            <li>Vendors selling a single agent and calling it a platform.</li>
+          </ul>
+        </div>
+        <div class="compare__col compare__col--good">
+          <div class="compare__lab">What actually moves a CRE firm</div>
+          <ul class="compare__list">
+            <li>Six specialist agents, each owning one part of the work.</li>
+            <li>Configured to your asset class, geography, and deal size band.</li>
+            <li>Speaks in your firm's voice — learned from your own samples.</li>
+            <li>Connects to the stack you already use, not the one we sell.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span class="wordmark" style="font-size: 13px;"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</span>
+      <span class="slide__num">02 · THE SHIFT</span>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 3 · WHAT SOHALA IS ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+    <div class="slide__glow--warm"></div>
+
+    <div class="slide__content">
+      <div class="eyebrow" style="align-self:flex-start;">
+        <span class="eyebrow__dot"></span>
+        Definition
+      </div>
+
+      <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width: 1000px;">
+        <h2 class="display h-lg" style="max-width: 960px;">
+          Six specialist AI agents, trained on the way <em>your firm</em> actually works.
+        </h2>
+        <p class="lede" style="margin-top: 28px;">
+          Not a copilot. Not a wrapper around ChatGPT. A staff of six — each with a clear role, configured to your context, working from a shared knowledge base of your firm.
+        </p>
+
+        <div class="stats">
+          <div>
+            <div class="stat__val">6 <em>agents</em></div>
+            <div class="stat__lab">Each one a specialist</div>
+          </div>
+          <div>
+            <div class="stat__val">1 <em>brain</em></div>
+            <div class="stat__lab">Shared firm knowledge</div>
+          </div>
+          <div>
+            <div class="stat__val">0 <em>generic</em></div>
+            <div class="stat__lab">Not a "ChatGPT for CRE"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span class="wordmark" style="font-size: 13px;"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</span>
+      <span class="slide__num">03 · WHAT IT IS</span>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 4 · THE SIX AGENTS ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+
+    <div class="slide__content">
+      <div class="eyebrow" style="align-self:flex-start;">
+        <span class="eyebrow__dot"></span>
+        The team
+      </div>
+
+      <h2 class="display h-md" style="margin-top: 24px; max-width: 880px;">
+        Each agent owns <em>one part of the work</em>.
+      </h2>
+
+      <div class="grid-agents" style="margin-top: 32px;">
+        <div class="agent">
+          <div class="agent__dot" style="background: linear-gradient(135deg, var(--nova) 0%, #ff6b3d 100%);">N</div>
+          <div class="agent__name">Nova</div>
+          <p class="agent__role">Strategy &amp; day architecture. Builds your morning brief from your 30-day priority.</p>
+        </div>
+        <div class="agent">
+          <div class="agent__dot" style="background: linear-gradient(135deg, var(--cipher) 0%, #4fcaff 100%);">C</div>
+          <div class="agent__name">Cipher</div>
+          <p class="agent__role">Systems &amp; integrations. Wires Sohala to the CRM and data sources you already use.</p>
+        </div>
+        <div class="agent">
+          <div class="agent__dot" style="background: linear-gradient(135deg, var(--lyra) 0%, #d488ff 100%);">L</div>
+          <div class="agent__name">Lyra</div>
+          <p class="agent__role">Client comms &amp; content. Writes in your voice, refuses your banned words, holds your line.</p>
+        </div>
+        <div class="agent">
+          <div class="agent__dot" style="background: linear-gradient(135deg, var(--vex) 0%, #4ee0a5 100%);">V</div>
+          <div class="agent__name">Vex</div>
+          <p class="agent__role">Market data &amp; intelligence. Watches your submarkets, surfaces what's moving and why.</p>
+        </div>
+        <div class="agent">
+          <div class="agent__dot" style="background: linear-gradient(135deg, var(--sage) 0%, #ffce4d 100%);">S</div>
+          <div class="agent__name">Sage</div>
+          <p class="agent__role">CMA &amp; valuation intelligence. Learns your comp methodology, applies it consistently.</p>
+        </div>
+        <div class="agent">
+          <div class="agent__dot" style="background: linear-gradient(135deg, var(--deal) 0%, #ff5b89 100%);">D</div>
+          <div class="agent__name">Deal</div>
+          <p class="agent__role">Transactions &amp; contracts. Tracks your pipeline stages, detects stalls, flags close signals.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span class="wordmark" style="font-size: 13px;"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</span>
+      <span class="slide__num">04 · THE SIX</span>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 5 · THE DIFFERENCE ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+
+    <div class="slide__content">
+      <div class="eyebrow" style="align-self:flex-start;">
+        <span class="eyebrow__dot"></span>
+        Differentiation
+      </div>
+
+      <h2 class="display h-md" style="margin-top: 24px; max-width: 900px;">
+        What "configured to your firm" <em>actually means</em>.
+      </h2>
+      <p class="sub" style="margin-top: 18px;">
+        Three concrete dimensions where Sohala adapts to you — not the other way around.
+      </p>
+
+      <div class="grid-3" style="margin-top: 36px;">
+        <div class="card">
+          <div class="card__head">01 · Voice</div>
+          <h3 class="card__title">Speaks in your voice.</h3>
+          <p class="card__body">Lyra learns your tone from samples you give us. Three voice descriptors. Banned words enforced. Tone shifts per audience — tenant, landlord, investor. If a client said "that doesn't sound like you," Lyra won't have caused it.</p>
+        </div>
+        <div class="card">
+          <div class="card__head">02 · Pipeline</div>
+          <h3 class="card__title">Works your pipeline.</h3>
+          <p class="card__body">Deal tracks the stages you actually use — not Salesforce defaults. Your average cycle. Your stall points. Your close signals. The system knows that an LOI in your firm means something specific.</p>
+        </div>
+        <div class="card">
+          <div class="card__head">03 · Stack</div>
+          <h3 class="card__title">Connects to your stack.</h3>
+          <p class="card__body">Cipher integrates with the CRM you actually use (not the one you bought), your market data sources (CoStar, Reonomy, county records), your comms channels. If a tool isn't on the list, Cipher builds the connector.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span class="wordmark" style="font-size: 13px;"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</span>
+      <span class="slide__num">05 · THE DIFFERENCE</span>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 6 · THE 30-MINUTE INTERVIEW ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+    <div class="slide__glow--warm"></div>
+
+    <div class="slide__content">
+      <div class="eyebrow" style="align-self:flex-start;">
+        <span class="eyebrow__dot"></span>
+        Onboarding
+      </div>
+
+      <h2 class="display h-md" style="margin-top: 24px; max-width: 880px;">
+        From sign-up to a configured instance in <em>thirty minutes</em>.
+      </h2>
+
+      <div style="display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; margin-top: 32px; align-items: start;">
+        <div>
+          <p class="sub">
+            A conversational interview — not a form. Six categories. Confidence-gated: the system asks follow-up questions only when it senses a gap, and stops when it knows enough. Most firms finish in 30 minutes; the median session lands at 35–40 questions.
+          </p>
+          <div class="stats" style="gap: 32px; margin-top: 28px;">
+            <div>
+              <div class="stat__val" style="font-size: 28px;">6 <em>categories</em></div>
+              <div class="stat__lab">Identity → Voice</div>
+            </div>
+            <div>
+              <div class="stat__val" style="font-size: 28px;">Adaptive</div>
+              <div class="stat__lab">No fixed tree</div>
+            </div>
+            <div>
+              <div class="stat__val" style="font-size: 28px;">Auto-save</div>
+              <div class="stat__lab">Resume any time</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup__tab">
+            <div class="mockup__url">cre.sohala.ai</div>
+          </div>
+          <div style="display:inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.7); border: 1px solid var(--hair); font-size: 9px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--slate); margin-bottom: 10px;">
+            <span style="display:inline-block; width:4px; height:4px; border-radius:50%; background:var(--accent); margin-right:6px;"></span>
+            Onboarding Interview · Private
+          </div>
+          <div class="mockup__head">Built for the next era of <em>commercial real estate</em>.</div>
+          <p class="mockup__sub">A thirty-minute conversation that shapes a custom AI strategy for your firm. Answer in your own time.</p>
+          <div class="mockup__cta">Begin interview →</div>
+
+          <div class="mockup__marquee">
+            <div class="mockup__brand">CoStar</div>
+            <div class="mockup__brand">Yardi</div>
+            <div class="mockup__brand" style="letter-spacing:0.14em;">VTS</div>
+            <div class="mockup__brand" style="font-family:'Newsreader',serif; font-style:italic;">Argus</div>
+            <div class="mockup__brand" style="letter-spacing:0.06em;">JLL</div>
+            <div class="mockup__brand" style="letter-spacing:0.08em;">CBRE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span class="wordmark" style="font-size: 13px;"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</span>
+      <span class="slide__num">06 · THE INTERVIEW</span>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 7 · THREE ARTIFACTS ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+
+    <div class="slide__content">
+      <div class="eyebrow" style="align-self:flex-start;">
+        <span class="eyebrow__dot"></span>
+        The output
+      </div>
+
+      <h2 class="display h-md" style="margin-top: 24px; max-width: 880px;">
+        Three files. Your firm, <em>machine-readable</em>.
+      </h2>
+      <p class="sub" style="margin-top: 16px;">
+        When the interview ends, three artifacts generate. You review and edit each one before commit. Nothing is final until you say so.
+      </p>
+
+      <div class="grid-3" style="margin-top: 28px;">
+        <div>
+          <div class="file">
+            <div class="file__head">
+              <span class="file__name">CLAUDE.md</span>
+              <span class="file__lab">Runtime context</span>
+            </div>
+            <div class="file__body"><span class="c"># Westview Capital</span>
+<span class="c"># Sohala Operating Context</span>
+
+## Identity
+Westview Capital is a
+<span class="k">tenant-rep</span> firm focused
+on <span class="k">office</span> and
+<span class="k">industrial</span> in
+<span class="k">Greater Toronto</span>.
+Deal size: <span class="k">$10M–$50M</span>.</div>
+          </div>
+          <p class="file__caption">Loaded by every Sohala agent at runtime. This is the file that makes the agents sound like they work for you.</p>
+        </div>
+
+        <div>
+          <div class="file">
+            <div class="file__head">
+              <span class="file__name">design.md</span>
+              <span class="file__lab">Instance design</span>
+            </div>
+            <div class="file__body"><span class="c"># Westview Capital</span>
+<span class="c"># Sohala Instance Design</span>
+
+## Agent Activation
+Day 1:  <span class="k">Nova, Lyra</span>
+Week 1: <span class="k">Vex, Deal</span>
+Month 1: <span class="k">Cipher, Sage</span>
+
+### Lyra
+Voice: <span class="k">direct, dry, expert</span>
+Channel: <span class="k">email + SMS</span></div>
+          </div>
+          <p class="file__caption">Which of the six agents do what, in what order, with what voice. Your Sohala, designed.</p>
+        </div>
+
+        <div>
+          <div class="file">
+            <div class="file__head">
+              <span class="file__name">brain.seed.json</span>
+              <span class="file__lab">Initial knowledge</span>
+            </div>
+            <div class="file__body">{
+  <span class="k">"firm_type"</span>: <span class="k">"cre_office"</span>,
+  <span class="k">"identity"</span>: {
+    <span class="k">"asset_classes"</span>: [
+      <span class="k">"office"</span>,
+      <span class="k">"industrial"</span>
+    ],
+    <span class="k">"deal_size_band"</span>:
+      <span class="k">"10m_50m"</span>
+  },
+  ...
+}</div>
+          </div>
+          <p class="file__caption">Structured, typed, validated. The seed your Brain grows from — and the start of your prediction corpus.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span class="wordmark" style="font-size: 13px;"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</span>
+      <span class="slide__num">07 · THE OUTPUT</span>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 8 · DAY ONE ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+
+    <div class="slide__content">
+      <div class="eyebrow" style="align-self:flex-start;">
+        <span class="eyebrow__dot"></span>
+        Day one
+      </div>
+
+      <h2 class="display h-md" style="margin-top: 24px; max-width: 900px;">
+        When the interview ends, <em>your team starts working</em>.
+      </h2>
+      <p class="sub" style="margin-top: 16px;">
+        By the end of Day 1 you have proof-of-fit — not slideware, actual output you can read.
+      </p>
+
+      <div class="day1">
+        <div class="day1__col">
+          <div class="day1__hour">Morning · 07:30</div>
+          <div class="day1__agent">Nova drafts your brief</div>
+          <p class="day1__action">Built from your 30-day priority. Three things to move, ordered by leverage. One sentence each.</p>
+          <p class="day1__sample">"Today, the one that matters is the Bloor &amp; Yonge tour. Two emails to send first."</p>
+        </div>
+        <div class="day1__col">
+          <div class="day1__hour">Mid-morning · 09:15</div>
+          <div class="day1__agent">Lyra writes the follow-up</div>
+          <p class="day1__action">In your voice, with your banned words enforced. You approve or revise — never the other way around.</p>
+          <p class="day1__sample">"Karen — quick on the Bloor space. Two things I noticed on the walk that I want to flag…"</p>
+        </div>
+        <div class="day1__col">
+          <div class="day1__hour">Afternoon · 14:00</div>
+          <div class="day1__agent">Vex surfaces a signal</div>
+          <p class="day1__action">Watches your top submarkets. Surfaces what's moving and why — not a feed, an opinion.</p>
+          <p class="day1__sample">"Two new sublease listings on Front St this morning. Both tenants you've worked with. Worth a call."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span class="wordmark" style="font-size: 13px;"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</span>
+      <span class="slide__num">08 · DAY ONE</span>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 9 · PREDICTION LAYER ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+
+    <div class="slide__content">
+      <div class="eyebrow" style="align-self:flex-start;">
+        <span class="eyebrow__dot"></span>
+        Over time
+      </div>
+
+      <h2 class="display h-md" style="margin-top: 24px; max-width: 900px;">
+        Every answer makes the system <em>smarter</em>.
+      </h2>
+      <p class="sub" style="margin-top: 18px;">
+        Sohala doesn't just store your firm context — it builds a labeled prediction-outcome corpus from the first session. Every deal that closes is a data point. Every stall is a signal. Over time, Sage learns the pattern of what wins for your firm specifically.
+      </p>
+
+      <div class="pred">
+        <div class="pred__timeline">
+          <svg class="pred__curve" viewBox="0 0 1000 120" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="pgrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(4,163,203,0.18)"/>
+                <stop offset="100%" stop-color="rgba(4,163,203,0)"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0 110 Q 200 95, 350 75 T 700 40 T 1000 12 L 1000 120 L 0 120 Z" fill="url(#pgrad)" />
+            <path d="M 0 110 Q 200 95, 350 75 T 700 40 T 1000 12" fill="none" stroke="#04a3cb" stroke-width="2"/>
+          </svg>
+          <div class="pred__line"></div>
+          <div class="pred__dot" style="left: 5%;"></div>
+          <div class="pred__dot" style="left: 25%;"></div>
+          <div class="pred__dot" style="left: 50%;"></div>
+          <div class="pred__dot" style="left: 75%;"></div>
+          <div class="pred__dot" style="left: 95%;"></div>
+          <div class="pred__tick" style="left: 5%;">Day 1</div>
+          <div class="pred__tick" style="left: 25%;">Day 30</div>
+          <div class="pred__tick" style="left: 50%;">Day 90</div>
+          <div class="pred__tick" style="left: 75%;">6 months</div>
+          <div class="pred__tick" style="left: 95%;">12 months</div>
+        </div>
+        <div class="pred__cap">Confidence in your firm's prediction signal over time. Day 1 is a seed; Year 1 is a moat.</div>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span class="wordmark" style="font-size: 13px;"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</span>
+      <span class="slide__num">09 · OVER TIME</span>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 10 · NEXT STEP ───────── -->
+  <section class="slide">
+    <div class="slide__glow"></div>
+    <div class="slide__glow--warm"></div>
+    <div class="slide__art" aria-hidden="true">
+      <svg viewBox="0 0 780 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#001419" stroke-width="0.6" stroke-opacity="0.42">
+          <line x1="0" y1="478" x2="780" y2="478" stroke-opacity="0.13"/>
+          <circle cx="430" cy="180" r="78" stroke-opacity="0.09"/>
+          <rect x="610" y="138" width="72" height="340"/>
+          <rect x="690" y="260" width="62" height="218"/>
+          <rect x="520" y="228" width="46" height="250"/>
+          <rect x="566" y="378" width="44" height="100"/>
+          <rect x="440" y="396" width="80" height="82"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="slide__content">
+      <div class="wordmark"><span class="teal">AI</span> for <span class="teal">CRE</span> Collective</div>
+
+      <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width: 960px;">
+        <div class="eyebrow" style="align-self:flex-start; margin-bottom: 28px;">
+          <span class="eyebrow__dot"></span>
+          Next step
+        </div>
+        <h2 class="display h-lg">
+          Start your interview at <em>cre.sohala.ai</em>.
+        </h2>
+        <p class="lede" style="margin-top: 26px; max-width: 720px;">
+          Thirty minutes. No commitment until you commit. We're not asking you to buy anything today — just to see what your firm looks like, machine-readable.
+        </p>
+
+        <div class="cta-block">
+          <a href="https://cre.sohala.ai" class="cta">
+            Begin the interview
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <div class="contact">
+            <div><strong>hello@aiforcre.com</strong></div>
+            <div style="color: var(--muted); font-size: 13px;">Reply with questions — or just send "ready" and we'll send the link.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide__footer">
+      <span>Privately hosted · SOC 2 Type II · End-to-end encrypted</span>
+      <span class="slide__num">10 · NEXT STEP</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Arrow key + space navigation between slides
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const deck = document.querySelector('.deck');
+  let current = 0;
+
+  function goTo(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides[current].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault();
+      goTo(current + 1);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      goTo(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      goTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      goTo(slides.length - 1);
+    } else if (e.key === 'p' && (e.metaKey || e.ctrlKey)) {
+      // let native print handle this
+    }
+  });
+
+  // Sync `current` with scroll position
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+        current = slides.indexOf(entry.target);
+      }
+    });
+  }, { threshold: [0.6] });
+  slides.forEach((s) => obs.observe(s));
+</script>
+</body>
+</html>
